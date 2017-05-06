@@ -1,0 +1,31 @@
+img, canvas {
+    image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
+    image-rendering: -moz-crisp-edges;          /* Firefox                        */
+    image-rendering: -o-crisp-edges;            /* Opera                          */
+    image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
+    image-rendering: pixelated; /* Chrome */
+    image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
+    -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+
+}
+
+*, html, body {
+  box-sizing: border-box;
+}
+body {
+  margin: 20px;
+  background: url('/img/bg.png') repeat;
+  /*text-align: center;*/
+}
+
+canvas {
+  margin: 0 auto;
+  border: 3px solid #eee;
+  border-radius: 5px;
+}
+
+#game-wrapper {
+  margin: 5% auto 5% auto;
+  max-height: 800px;
+  max-width: 1280px;
+}
