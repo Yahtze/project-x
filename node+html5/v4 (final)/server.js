@@ -4,12 +4,20 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var _ = require('lodash');
 
+/***************************************************************
+ * Util Fns
+ ***************************************************************/
+
 function getNowMs() { return new Date().getTime(); }
 function log(type, args) { console.log('['+type.toUpperCase()+'] ',args); }
 function debug(args) { log('debug', args); }
 function info(args) { log('info', args); }
 function warn(args) { log('warn', args); }
 function error(args) { log('error', args); }
+
+/***************************************************************
+ * Initialization
+ ***************************************************************/
 
 var world = {
     height: 1000,
@@ -30,6 +38,10 @@ var defaultPlayer = {
         right: false
     }
 };
+
+/***************************************************************
+ * Client/Server comms
+ ***************************************************************/
 
 io.on('connection', function (socket){
     info('A user connected!');
@@ -54,9 +66,21 @@ io.on('connection', function (socket){
     });
 });
 
-http.listen(3000, 'localhost', function () {
-    info('Game server started & awaiting connections.');
-});
+function broadcastState () {
+    var worldToBroadcast = {
+        players: world.players
+    };
+
+    world.sockets.forEach(function(socket) {
+        socket.emit('world', worldToBroadcast);
+    });
+}
+
+setInterval(broadcastState, 1000 / 30);
+
+/***************************************************************
+ * World updates, physics, etc
+ ***************************************************************/
 
 function updatePlayer (player) {
     if (player.inputs.up) player.y -= 5;
@@ -69,15 +93,13 @@ function tick () {
     world.players.forEach(updatePlayer);
 }
 
-function broadcastState () {
-    var worldToBroadcast = {
-        players: world.players
-    };
-
-    world.sockets.forEach(function(socket) {
-        socket.emit('world', worldToBroadcast);
-    });
-}
-
 setInterval(tick, 1000 / 30);
-setInterval(broadcastState, 1000 / 30);
+
+
+/***************************************************************
+ * HTTP server startup
+ ***************************************************************/
+
+http.listen(3000, 'localhost', function () {
+    info('Game server started & awaiting connections.');
+});

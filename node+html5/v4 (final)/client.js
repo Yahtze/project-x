@@ -1,5 +1,5 @@
 /***************************************************************
- * Initialization
+ * Initialization & Input Listeners
  ***************************************************************/
 
 var canvas = document.getElementById('game');
@@ -18,20 +18,19 @@ canvas.addEventListener('mousemove', function(e) {
     console.log('mouse moved', e.offsetX, e.offsetY);
 }, false);
 
-window.addEventListener('keydown', function (e){
+canvas.addEventListener('keydown', function (e){
     if (e.keyCode === 87) inputs.up = true;
     if (e.keyCode === 83) inputs.down = true;
     if (e.keyCode === 65) inputs.left = true;
     if (e.keyCode === 68) inputs.right = true;
 }, false);
 
-window.addEventListener('keyup', function (e){
+canvas.addEventListener('keyup', function (e){
     if (e.keyCode === 87) inputs.up = false;
     if (e.keyCode === 83) inputs.down = false;
     if (e.keyCode === 65) inputs.left = false;
     if (e.keyCode === 68) inputs.right = false;
 }, false);
-
 
 /***************************************************************
  * Client/Server Communication
