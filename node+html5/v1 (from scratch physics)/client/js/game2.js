@@ -106,8 +106,8 @@ var update = function(game){
     gameWorld.pivot.y = player.y;
     gameWorld.pivot.x = player.x;
 
-    if (!$('#game-wrapper').is(':visible')) {
-      setTimeout(function() { $('#game-wrapper').show(); }, 500);
+    if (!jQuery('#game-wrapper').is(':visible')) {
+      setTimeout(function() { jQuery('#game-wrapper').show(); }, 500);
     }
 
     // set our world scale as needed
