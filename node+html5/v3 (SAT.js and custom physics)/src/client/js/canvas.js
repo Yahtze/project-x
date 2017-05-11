@@ -12,7 +12,7 @@ class Canvas {
         this.cv = document.getElementById('cvs');
         this.cv.width = global.screenWidth;
         this.cv.height = global.screenHeight;
-        this.cv.addEventListener('mousemove', this.gameInput, false);
+        // this.cv.addEventListener('mousemove', this.gameInput, false);
         this.cv.addEventListener('mouseout', this.outOfBounds, false);
         this.cv.addEventListener('keypress', this.keyInput, false);
         this.cv.addEventListener('keyup', function(event) {
@@ -20,8 +20,8 @@ class Canvas {
             self.directionUp(event);
         }, false);
         this.cv.addEventListener('keydown', this.directionDown, false);
-        this.cv.addEventListener('touchstart', this.touchInput, false);
-        this.cv.addEventListener('touchmove', this.touchInput, false);
+        // this.cv.addEventListener('touchstart', this.touchInput, false);
+        // this.cv.addEventListener('touchmove', this.touchInput, false);
         this.cv.parent = self;
         global.canvas = this;
     }

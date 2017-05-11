@@ -18,7 +18,7 @@ if ( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {
 }
 
 function startGame(type) {
-    global.playerName = playerNameInput.value.replace(/(<([^>]+)>)/ig, '').substring(0,25);
+    global.playerName = 'player';
     global.playerType = type;
 
     global.screenWidth = window.innerWidth;
@@ -47,50 +47,10 @@ function validNick() {
 }
 
 window.onload = function() {
-
-    var btn = document.getElementById('startButton'),
-        btnS = document.getElementById('spectateButton'),
-        nickErrorText = document.querySelector('#startMenu .input-error');
-
-    btnS.onclick = function () {
-        startGame('spectate');
-    };
-
+    var btn = document.getElementById('startButton');
     btn.onclick = function () {
-
-        // Checks if the nick is valid.
-        if (validNick()) {
-            nickErrorText.style.opacity = 0;
-            startGame('player');
-        } else {
-            nickErrorText.style.opacity = 1;
-        }
+        startGame('player');
     };
-
-    var settingsMenu = document.getElementById('settingsButton');
-    var settings = document.getElementById('settings');
-    var instructions = document.getElementById('instructions');
-
-    settingsMenu.onclick = function () {
-        if (settings.style.maxHeight == '300px') {
-            settings.style.maxHeight = '0px';
-        } else {
-            settings.style.maxHeight = '300px';
-        }
-    };
-
-    playerNameInput.addEventListener('keypress', function (e) {
-        var key = e.which || e.keyCode;
-
-        if (key === global.KEY_ENTER) {
-            if (validNick()) {
-                nickErrorText.style.opacity = 0;
-                startGame('player');
-            } else {
-                nickErrorText.style.opacity = 1;
-            }
-        }
-    });
 };
 
 // TODO: Break out into GameControls.
@@ -121,24 +81,19 @@ var foods = [];
 var viruses = [];
 var fireFood = [];
 var users = [];
-var leaderboard = [];
 var target = {x: player.x, y: player.y};
 global.target = target;
 
 window.canvas = new Canvas();
 window.chat = new ChatClient();
 
-var visibleBorderSetting = document.getElementById('visBord');
-visibleBorderSetting.onchange = settings.toggleBorder;
+var visibleBorderSetting = true;
 
-var showMassSetting = document.getElementById('showMass');
-showMassSetting.onchange = settings.toggleMass;
+var showMassSetting = true;
 
-var continuitySetting = document.getElementById('continuity');
-continuitySetting.onchange = settings.toggleContinuity;
+var continuitySetting = true;
 
-var roundFoodSetting = document.getElementById('roundFood');
-roundFoodSetting.onchange = settings.toggleRoundFood;
+var roundFoodSetting = true;
 
 var c = window.canvas.cv;
 var graph = c.getContext('2d');
@@ -209,27 +164,6 @@ function setupSocket(socket) {
 
     socket.on('playerJoin', function (data) {
         window.chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> joined.');
-    });
-
-    socket.on('leaderboard', function (data) {
-        leaderboard = data.leaderboard;
-        var status = '<span class="title">Leaderboard</span>';
-        for (var i = 0; i < leaderboard.length; i++) {
-            status += '<br />';
-            if (leaderboard[i].id == player.id){
-                if(leaderboard[i].name.length !== 0)
-                    status += '<span class="me">' + (i + 1) + '. ' + leaderboard[i].name + "</span>";
-                else
-                    status += '<span class="me">' + (i + 1) + ". An unnamed cell</span>";
-            } else {
-                if(leaderboard[i].name.length !== 0)
-                    status += (i + 1) + '. ' + leaderboard[i].name;
-                else
-                    status += (i + 1) + '. An unnamed cell';
-            }
-        }
-        //status += '<br />Players: ' + data.players;
-        document.getElementById('status').innerHTML = status;
     });
 
     socket.on('serverMSG', function (data) {
@@ -313,33 +247,6 @@ function drawCircle(centerX, centerY, radius, sides) {
     graph.closePath();
     graph.stroke();
     graph.fill();
-}
-
-function drawFood(food) {
-    graph.strokeStyle = 'hsl(' + food.hue + ', 100%, 45%)';
-    graph.fillStyle = 'hsl(' + food.hue + ', 100%, 50%)';
-    graph.lineWidth = foodConfig.border;
-    drawCircle(food.x - player.x + global.screenWidth / 2,
-               food.y - player.y + global.screenHeight / 2,
-               food.radius, global.foodSides);
-}
-
-function drawVirus(virus) {
-    graph.strokeStyle = virus.stroke;
-    graph.fillStyle = virus.fill;
-    graph.lineWidth = virus.strokeWidth;
-    drawCircle(virus.x - player.x + global.screenWidth / 2,
-               virus.y - player.y + global.screenHeight / 2,
-               virus.radius, global.virusSides);
-}
-
-function drawFireFood(mass) {
-    graph.strokeStyle = 'hsl(' + mass.hue + ', 100%, 45%)';
-    graph.fillStyle = 'hsl(' + mass.hue + ', 100%, 50%)';
-    graph.lineWidth = playerConfig.border+10;
-    drawCircle(mass.x - player.x + global.screenWidth / 2,
-               mass.y - player.y + global.screenHeight / 2,
-               mass.radius-5, 18 + (~~(mass.masa/5)));
 }
 
 function drawPlayers(order) {
@@ -547,9 +454,6 @@ function gameLoop() {
             graph.fillRect(0, 0, global.screenWidth, global.screenHeight);
 
             drawgrid();
-            foods.forEach(drawFood);
-            fireFood.forEach(drawFireFood);
-            viruses.forEach(drawVirus);
 
             if (global.borderDraw) {
                 drawborder();
