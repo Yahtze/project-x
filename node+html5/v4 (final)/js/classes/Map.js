@@ -10,9 +10,9 @@ function Map(game, width, height, context) {
   self.image = null;
 
   self.generate = function() {
-    // var context = document.getElementById('game').getContext('2d');
-    // context.canvas.width = this.width;
-    // context.canvas.height = this.height;
+    // var context = document.getElementById('game-background').getContext('2d');
+    context.canvas.width = this.width;
+    context.canvas.height = this.height;
     var rows = ~~(this.width / 44) + 1;
     var columns = ~~(this.height / 44) + 1;
     var color = "red";

@@ -30,6 +30,9 @@ var Game = function (initialWorldState, socket) {
 
   self.world.map.generate();
 
+  self.context.canvas.width = 720;
+  self.context.canvas.height = 405;
+
   self.camera = new Camera(
     self,
     0,
