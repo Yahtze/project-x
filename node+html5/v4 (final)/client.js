@@ -1,77 +1,83 @@
-/***************************************************************
- * Initialization & Input Listeners
- ***************************************************************/
+// var initGame = function() {
+//     var canvas = document.getElementById("game");
+//     var context = canvas.getContext("2d");
+//     Game.controls = {};
+//     Game.canvas = canvas;
+//
+//     var FPS = 30;
+//     var INTERVAL = 1000/FPS;
+//     var STEP = INTERVAL/1000;
+//
+//     // setup player
+//     var player = new Game.Player(50, 50);
+//     Game.currentPlayer = player;
+//
+//     // setup the magic camera !!!
+//     var camera = new Game.Camera(0, 0, canvas.width, canvas.height, world.width, world.height);
+//     camera.follow(player, canvas.width/2, canvas.height/2);
+//
+//     // Game update function
+//     var update = function(){
+//         player.update(STEP, world.width, world.height);
+//         camera.update();
+//     }
+//
+//     // Game draw function
+//     var draw = function(){
+//         // clear the entire canvas
+//         context.clearRect(0, 0, canvas.width, canvas.height);
+//
+//         // redraw all objects
+//         world.map.draw(context, camera.xView, camera.yView);
+//         player.draw(context, camera.xView, camera.yView);
+//     }
+//
+//
+//     var runningId = -1;
+//
+//     Game.play = function(){
+//         if(runningId == -1){
+//             runningId = setInterval(function(){
+//                 gameLoop();
+//             }, INTERVAL);
+//             console.log("play");
+//         }
+//     }
+//
+//     Game.controls = {
+//       left: false,
+//       up: false,
+//       right: false,
+//       down: false,
+//       mouseX: 0,
+//       mouseY: 0,
+//       canvasX: 0,
+//       canvasY: 0
+//     };
+//
+// };
+// socket.on('world', updateGameState);
 
-var canvas = document.getElementById('game');
-var world;
+// var lastBroadcastedInputs;
+//
+// function sendInputs () {
+//     if (_.isEqual(Game.controls, lastBroadcastedInputs)) { return; }
+//     socket.emit('inputs', Game.controls);
+//     lastBroadcastedInputs = _.cloneDeep(Game.controls);
+// }
 
-var inputs = {
-    up: false,
-    down: false,
-    left: false,
-    right: false,
-    mouseX: 0,
-    mouseY: 0
+// setInterval(sendInputs, 1000 / 30);
+
+window.gameSocket = io(window.location.href);
+
+var setupGame = function (initialWorldState) {
+  info('Initial world state received, setting up game!');
+  window.game = new Game(initialWorldState, gameSocket);
+  game.draw();
 };
 
-canvas.addEventListener('mousemove', function(e) {
-    console.log('mouse moved', e.offsetX, e.offsetY);
-}, false);
-
-canvas.addEventListener('keydown', function (e){
-    if (e.keyCode === 87) inputs.up = true;
-    if (e.keyCode === 83) inputs.down = true;
-    if (e.keyCode === 65) inputs.left = true;
-    if (e.keyCode === 68) inputs.right = true;
-}, false);
-
-canvas.addEventListener('keyup', function (e){
-    if (e.keyCode === 87) inputs.up = false;
-    if (e.keyCode === 83) inputs.down = false;
-    if (e.keyCode === 65) inputs.left = false;
-    if (e.keyCode === 68) inputs.right = false;
-}, false);
-
-/***************************************************************
- * Client/Server Communication
- ***************************************************************/
-
-var socket = io(window.location.href);
-
-socket.on('world', function (updatedWorld) {
-    world = updatedWorld;
+gameSocket.on('connect', function() {
+  info('Connected to the server, waiting for initial game world!');
 });
 
-var lastBroadcastedInputs;
-
-function sendInputs () {
-    if (_.isEqual(inputs, lastBroadcastedInputs)) { return; }
-    socket.emit('inputs', inputs);
-    lastBroadcastedInputs = _.cloneDeep(inputs);
-}
-
-setInterval(sendInputs, 1000 / 30);
-
-/***************************************************************
- * Rendering
- ***************************************************************/
-
- var draw = canvas.getContext('2d');
-
- draw.imageSmoothingEnabled = false;
- draw.translate(0.5, 0.5);
-
-function renderPlayer (player) {
-    draw.fillStyle = 'rgb(200,0,0)';
-    draw.fillRect(player.x, player.y, player.width, player.height);
-}
-
-function render () {
-    draw.clearRect(0, 0, canvas.width, canvas.height);
-    if (world !== undefined) {
-        world.players.forEach(renderPlayer);
-    }
-    window.requestAnimationFrame(render);
-}
-
-render ();
+gameSocket.on('initialWorldState', setupGame);

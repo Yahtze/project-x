@@ -9,33 +9,32 @@ var _ = require('lodash');
  ***************************************************************/
 
 function getNowMs() { return new Date().getTime(); }
-function log(type, args) { console.log('['+type.toUpperCase()+'] ',args); }
-function debug(args) { log('debug', args); }
-function info(args) { log('info', args); }
-function warn(args) { log('warn', args); }
-function error(args) { log('error', args); }
 
 /***************************************************************
  * Initialization
  ***************************************************************/
 
-var world = {
-    height: 1000,
-    width: 1000,
+var World = {
+    height: 1500,
+    width: 1500,
     players: [],
     sockets: []
 };
 
 var defaultPlayer = {
-    x: 0,
-    y: 0,
-    width: 30,
-    height: 10,
+    x: 10,
+    y: 10,
+    width: 20,
+    height: 40,
     inputs: {
-        up: false,
-        down: false,
-        left: false,
-        right: false
+      left: false,
+      up: false,
+      right: false,
+      down: false,
+      mouseX: 0,
+      mouseY: 0,
+      canvasX: 0,
+      canvasY: 0
     }
 };
 
@@ -44,15 +43,16 @@ var defaultPlayer = {
  ***************************************************************/
 
 io.on('connection', function (socket){
-    info('A user connected!');
+    console.log('A user connected!');
     var thisPlayer = _.cloneDeep(defaultPlayer);
     thisPlayer.id = socket.id;
 
-    world.players.push(thisPlayer);
-    world.sockets.push(socket);
+    World.players.push(thisPlayer);
+    World.sockets.push(socket);
 
     socket.on('inputs', function (inputs) {
-        world.players.forEach(function(player) {
+        console.log('Got player inputs', JSON.stringify(inputs, null, 2));
+        World.players.forEach(function(player) {
             if (player.id === thisPlayer.id) {
                 player.inputs = inputs;
             }
@@ -60,19 +60,30 @@ io.on('connection', function (socket){
     });
 
     socket.on('disconnect', function () {
-        _.remove(world.players, function(player) {
+        _.remove(World.players, function(player) {
             return player.id === thisPlayer.id;
         });
     });
 });
 
 function broadcastState () {
+    if (World.players.length === 0) return;
+
     var worldToBroadcast = {
-        players: world.players
+        players: World.players
     };
 
-    world.sockets.forEach(function(socket) {
-        socket.emit('world', worldToBroadcast);
+    var initialWorldToBroadcast = {
+      players: World.players,
+      width: World.height,
+      height: World.width
+    };
+
+    World.sockets.forEach(function(socket) {
+        var messageToEmit = socket.isInitialStateBroadcasted ? 'world' : 'initialWorldState';
+        var worldToEmit = socket.isInitialStateBroadcasted ? worldToBroadcast : initialWorldToBroadcast;
+        socket.emit(messageToEmit, worldToEmit);
+        socket.isInitialStateBroadcasted = true;
     });
 }
 
@@ -90,16 +101,15 @@ function updatePlayer (player) {
 }
 
 function tick () {
-    world.players.forEach(updatePlayer);
+    World.players.forEach(updatePlayer);
 }
 
 setInterval(tick, 1000 / 30);
-
 
 /***************************************************************
  * HTTP server startup
  ***************************************************************/
 
 http.listen(3000, 'localhost', function () {
-    info('Game server started & awaiting connections.');
+    console.log('Game server started & awaiting connections.');
 });
